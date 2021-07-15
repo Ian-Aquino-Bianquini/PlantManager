@@ -33,7 +33,6 @@ export function UserIdentification() {
   function handleInputBlur() {
     setIsFocused(false);
     setIsFilled(!!name);
-    // handleInputChange(name );
   }
 
   function handleInputFocus() {
