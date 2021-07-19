@@ -13,23 +13,13 @@ import { EnviromentButton } from "../components/EnviromentButton";
 import { Header } from "../components/Header";
 import { PlantCardPrimary } from "../components/PlantCardPrimary";
 import api from "../services/api";
+import { PlantProps } from "../libs/storage";
 
 import { Load } from "../components/Load";
+import { useNavigation } from "@react-navigation/native";
 interface EnviromentProps {
   key: string;
   title: string;
-}
-interface PlantProps {
-  id: string;
-  name: string;
-  about: string;
-  water_tips: string;
-  photo: string;
-  environments: [string];
-  frequency: {
-    times: number;
-    repeat_every: string;
-  };
 }
 
 export function PlantSelect() {
@@ -39,9 +29,10 @@ export function PlantSelect() {
   const [environmentSelected, setEnvironmentSelected] = useState("all");
   const [loading, setLoading] = useState(true);
 
+  const navigation = useNavigation();
+
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [loadedAll, setLoadedAll] = useState(false);
 
   function handleEnvironmentSelected(environment: string) {
     setEnvironmentSelected(environment);
@@ -82,6 +73,10 @@ export function PlantSelect() {
     fetchPlants();
   }
 
+  function handlePlantSelect(plant: PlantProps) {
+    navigation.navigate("PlantSave", { plant });
+  }
+
   useEffect(() => {
     async function fetchEnviroments() {
       const { data } = await api.get(
@@ -119,6 +114,7 @@ export function PlantSelect() {
         <FlatList
           data={enviroment}
           horizontal
+          keyExtractor={(item) => String(item.key)}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.environmentList}
           renderItem={({ item }) => (
@@ -134,6 +130,7 @@ export function PlantSelect() {
       <View style={styles.plants}>
         <FlatList
           data={filteredPlants}
+          keyExtractor={(item) => String(item.id)}
           showsVerticalScrollIndicator={false}
           numColumns={2}
           onEndReachedThreshold={0.1}
@@ -143,7 +140,12 @@ export function PlantSelect() {
           ListFooterComponent={
             loadingMore ? <ActivityIndicator color={colors.green} /> : <></>
           }
-          renderItem={({ item }) => <PlantCardPrimary data={item} />}
+          renderItem={({ item }) => (
+            <PlantCardPrimary
+              data={item}
+              onPress={() => handlePlantSelect(item)}
+            />
+          )}
         ></FlatList>
       </View>
     </View>
